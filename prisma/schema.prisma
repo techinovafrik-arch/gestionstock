@@ -6,5 +6,212 @@ datasource db {
   provider = "sqlite"
 }
 
-// Aucun modèle à ce stade (Phase 0 — cadrage technique).
-// Le modèle de données complet est introduit en Phase 1, voir docs/DATA_MODEL.md.
+enum TypeMouvement {
+  RECEPTION
+  VENTE
+  RETOUR
+  AJUSTEMENT
+}
+
+enum StatutBonLivraison {
+  EMIS
+  LIVRE
+  FACTURE
+  ANNULE
+}
+
+enum StatutPaiement {
+  EMISE
+  PARTIELLE
+  REGLEE
+  ANNULEE
+}
+
+enum StatutReversement {
+  OUVERT
+  CLOTURE
+}
+
+enum RoleUtilisateur {
+  ADMINISTRATEUR
+  OPERATEUR
+}
+
+model Fournisseur {
+  id        String    @id @default(cuid())
+  nom       String
+  adresse   String?
+  telephone String?
+  contact   String?
+  ouvrages  Ouvrage[]
+}
+
+model Ouvrage {
+  id                 String              @id @default(cuid())
+  isbn               String?             @unique
+  titre              String
+  matiere            String?
+  niveau             String?
+  editeurOrigine     String?
+  prixAchat          Int
+  prixVente          Int
+  quantiteDisponible Int                 @default(0)
+  seuilAlerte        Int                 @default(0)
+  actif              Boolean             @default(true)
+  fournisseurId      String
+  fournisseur        Fournisseur         @relation(fields: [fournisseurId], references: [id])
+  mouvements         MouvementStock[]
+  lignesBL           LigneBonLivraison[]
+  lignesFacture      LigneFacture[]
+  lignesReversement  LigneReversement[]
+  createdAt          DateTime            @default(now())
+  updatedAt          DateTime            @updatedAt
+}
+
+model MouvementStock {
+  id            String        @id @default(cuid())
+  typeMouvement TypeMouvement
+  ouvrageId     String
+  ouvrage       Ouvrage       @relation(fields: [ouvrageId], references: [id])
+  quantite      Int
+  dateMouvement DateTime      @default(now())
+  idDocumentRef String?
+  utilisateurId String
+  utilisateur   Utilisateur   @relation(fields: [utilisateurId], references: [id])
+  motif         String?
+}
+
+model Commune {
+  id            String         @id @default(cuid())
+  nom           String         @unique
+  clients       Client[]
+  bonsLivraison BonLivraison[]
+}
+
+model Client {
+  id            String         @id @default(cuid())
+  nom           String
+  typeClient    String
+  communeId     String
+  commune       Commune        @relation(fields: [communeId], references: [id])
+  telephone     String?
+  adresse       String?
+  bonsLivraison BonLivraison[]
+  factures      Facture[]
+  createdAt     DateTime       @default(now())
+}
+
+model BonLivraison {
+  id                 String                @id @default(cuid())
+  numeroBL           String                @unique
+  dateBL             DateTime              @default(now())
+  clientId           String
+  client             Client                @relation(fields: [clientId], references: [id])
+  communeLivraisonId String
+  communeLivraison   Commune               @relation(fields: [communeLivraisonId], references: [id])
+  adresseLivraison   String?
+  statutBL           StatutBonLivraison    @default(EMIS)
+  utilisateurId      String
+  utilisateur        Utilisateur           @relation(fields: [utilisateurId], references: [id])
+  lignes             LigneBonLivraison[]
+  factures           FactureBonLivraison[]
+  motifAnnulation    String?
+}
+
+model LigneBonLivraison {
+  id                String       @id @default(cuid())
+  bonLivraisonId    String
+  bonLivraison      BonLivraison @relation(fields: [bonLivraisonId], references: [id])
+  ouvrageId         String
+  ouvrage           Ouvrage      @relation(fields: [ouvrageId], references: [id])
+  quantite          Int
+  prixVenteUnitaire Int
+}
+
+model Facture {
+  id             String                @id @default(cuid())
+  numeroFacture  String                @unique
+  dateFacture    DateTime              @default(now())
+  clientId       String
+  client         Client                @relation(fields: [clientId], references: [id])
+  montantHT      Int
+  remise         Int                   @default(0)
+  montantTotal   Int
+  statutPaiement StatutPaiement        @default(EMISE)
+  lignes         LigneFacture[]
+  bonsLivraison  FactureBonLivraison[]
+  reglements     Reglement[]
+}
+
+model FactureBonLivraison {
+  factureId      String
+  facture        Facture      @relation(fields: [factureId], references: [id])
+  bonLivraisonId String
+  bonLivraison   BonLivraison @relation(fields: [bonLivraisonId], references: [id])
+
+  @@id([factureId, bonLivraisonId])
+}
+
+model LigneFacture {
+  id           String  @id @default(cuid())
+  factureId    String
+  facture      Facture @relation(fields: [factureId], references: [id])
+  ouvrageId    String
+  ouvrage      Ouvrage @relation(fields: [ouvrageId], references: [id])
+  quantite     Int
+  prixUnitaire Int
+  montantLigne Int
+}
+
+model Reglement {
+  id            String   @id @default(cuid())
+  factureId     String
+  facture       Facture  @relation(fields: [factureId], references: [id])
+  dateReglement DateTime @default(now())
+  montant       Int
+  modePaiement  String
+}
+
+model Reversement {
+  id                String             @id @default(cuid())
+  periodeDebut      DateTime
+  periodeFin        DateTime
+  montantDu         Int
+  montantVerse      Int                @default(0)
+  dateVersement     DateTime?
+  statutReversement StatutReversement  @default(OUVERT)
+  lignes            LigneReversement[]
+}
+
+model LigneReversement {
+  id                String      @id @default(cuid())
+  reversementId     String
+  reversement       Reversement @relation(fields: [reversementId], references: [id])
+  ouvrageId         String
+  ouvrage           Ouvrage     @relation(fields: [ouvrageId], references: [id])
+  quantiteVendue    Int
+  prixAchatUnitaire Int
+  montantDu         Int
+}
+
+model Utilisateur {
+  id             String           @id @default(cuid())
+  nom            String
+  identifiant    String           @unique
+  motDePasseHash String
+  role           RoleUtilisateur  @default(OPERATEUR)
+  actif          Boolean          @default(true)
+  mouvements     MouvementStock[]
+  bonsLivraison  BonLivraison[]
+  journal        JournalAudit[]
+}
+
+model JournalAudit {
+  id            String      @id @default(cuid())
+  utilisateurId String
+  utilisateur   Utilisateur @relation(fields: [utilisateurId], references: [id])
+  action        String
+  cible         String
+  detail        String?
+  dateAction    DateTime    @default(now())
+}

@@ -11,6 +11,7 @@ import {
   creerClient,
   listerClients,
   listerCommunes,
+  listerFournisseurs,
   listerUtilisateurs
 } from '../services/referentiels'
 import { creerOuvrage, listerOuvrages, modifierOuvrage } from '../services/ouvrages'
@@ -25,6 +26,9 @@ export function enregistrerHandlersReferentiels(db: PrismaClient): void {
   )
   ipcMain.handle('referentiels:modifierOuvrage', (_event, input: ModifierOuvrageInput) =>
     versResultat(() => modifierOuvrage(db, input))
+  )
+  ipcMain.handle('referentiels:listerFournisseurs', () =>
+    versResultat(() => listerFournisseurs(db))
   )
   ipcMain.handle('referentiels:listerCommunes', () => versResultat(() => listerCommunes(db)))
   ipcMain.handle('referentiels:listerClients', (_event, input: ListerClientsInput) =>

@@ -1,6 +1,10 @@
 import type { PrismaClient } from '@prisma/client'
 import type { CreerClientInput, ListerClientsInput } from '../../shared/types'
 
+export async function listerFournisseurs(db: PrismaClient) {
+  return db.fournisseur.findMany({ orderBy: { nom: 'asc' } })
+}
+
 export async function listerCommunes(db: PrismaClient) {
   return db.commune.findMany({ orderBy: { nom: 'asc' } })
 }

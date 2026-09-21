@@ -9,6 +9,7 @@ import type {
   CreerOuvrageInput,
   CreerReceptionInput,
   CreerReceptionOutput,
+  Fournisseur,
   HistoriqueStockInput,
   IpcResult,
   ListerClientsInput,
@@ -25,6 +26,7 @@ export interface Api {
     listerOuvrages(input?: ListerOuvragesInput): Promise<IpcResult<Ouvrage[]>>
     creerOuvrage(input: CreerOuvrageInput): Promise<IpcResult<Ouvrage>>
     modifierOuvrage(input: ModifierOuvrageInput): Promise<IpcResult<Ouvrage>>
+    listerFournisseurs(): Promise<IpcResult<Fournisseur[]>>
     listerCommunes(): Promise<IpcResult<Commune[]>>
     listerClients(input?: ListerClientsInput): Promise<IpcResult<Client[]>>
     creerClient(input: CreerClientInput): Promise<IpcResult<Client>>

@@ -22,6 +22,14 @@ export interface Ouvrage {
   fournisseurId: string
 }
 
+export interface Fournisseur {
+  id: string
+  nom: string
+  adresse: string | null
+  telephone: string | null
+  contact: string | null
+}
+
 export interface Commune {
   id: string
   nom: string

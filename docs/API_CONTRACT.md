@@ -18,6 +18,7 @@ Convention de nommage des canaux : `domaine:action` (ex. `stock:ajuster`, `vente
 | `referentiels:listerOuvrages` | `{ recherche?: string; actifSeulement?: boolean }` | `Ouvrage[]` |
 | `referentiels:creerOuvrage` | `{ titre; isbn?; matiere?; niveau?; editeurOrigine?; prixAchat; prixVente; seuilAlerte; fournisseurId }` | `Ouvrage` |
 | `referentiels:modifierOuvrage` | `{ id; ...champs partiels }` | `Ouvrage` |
+| `referentiels:listerFournisseurs` | `{}` | `Fournisseur[]` (en pratique un seul enregistrement — Supernova — voir `CLAUDE.md` §2) |
 | `referentiels:listerCommunes` | `{}` | `Commune[]` |
 | `referentiels:listerClients` | `{ recherche?: string; communeId?: string }` | `Client[]` |
 | `referentiels:creerClient` | `{ nom; typeClient; communeId; telephone?; adresse? }` | `Client` |

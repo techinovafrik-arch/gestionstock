@@ -22,6 +22,7 @@ const api: Api = {
       ipcRenderer.invoke('referentiels:creerOuvrage', input),
     modifierOuvrage: (input: ModifierOuvrageInput) =>
       ipcRenderer.invoke('referentiels:modifierOuvrage', input),
+    listerFournisseurs: () => ipcRenderer.invoke('referentiels:listerFournisseurs'),
     listerCommunes: () => ipcRenderer.invoke('referentiels:listerCommunes'),
     listerClients: (input: ListerClientsInput = {}) =>
       ipcRenderer.invoke('referentiels:listerClients', input),

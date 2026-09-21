@@ -22,6 +22,12 @@
 - **Justification** : le FCFA n'a pas de centime circulant en usage courant en Afrique de l'Ouest ; un modèle « centimes » générique n'apporterait aucune valeur ici et complexifierait inutilement l'affichage et les calculs.
 - **Impact** : `prisma/schema.prisma` (tous les champs monétaires en `Int`), `docs/DATA_MODEL.md`, services de calcul (`prixAchat`, `prixVente`, `montantDu`, remises).
 
+## 2026-09 — Prisma 7 : configuration par adapter (impact Phase 1)
+
+- **Constat** : Prisma 7 (utilisé dès le scaffolding) a retiré le support de `datasource.url` dans `schema.prisma` pour Migrate/Client — la connexion se configure désormais dans `prisma.config.ts` (racine), et `PrismaClient` s'instancie avec un **driver adapter** plutôt qu'un moteur Rust intégré.
+- **Décision** : adapter SQLite = `@prisma/adapter-better-sqlite3` (+ dépendance native `better-sqlite3`). `schema.prisma` ne contient plus que `datasource db { provider = "sqlite" }` (sans `url`) ; la variable `DATABASE_URL` est chargée depuis `.env` via `dotenv/config` dans `prisma.config.ts` et référencée par `env("DATABASE_URL")` (import `env` depuis `prisma/config`, pas depuis le DSL du schéma).
+- **Impact** : `src/main/data` (Phase 1) doit instancier le client ainsi : `new PrismaClient({ adapter: new PrismaBetterSqlite3({ url }) })` — ne pas suivre les exemples Prisma < 7 (`new PrismaClient()` sans adapter, ou `url` dans le schéma), qui ne fonctionnent plus. Voir `prisma.config.ts` et `prisma/schema.prisma`.
+
 ## Modèle de décision à suivre pour les prochaines entrées
 
 ```

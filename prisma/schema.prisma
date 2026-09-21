@@ -1,0 +1,10 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+}
+
+// Aucun modèle à ce stade (Phase 0 — cadrage technique).
+// Le modèle de données complet est introduit en Phase 1, voir docs/DATA_MODEL.md.

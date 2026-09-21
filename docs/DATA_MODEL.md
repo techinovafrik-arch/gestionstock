@@ -103,7 +103,7 @@ model Ouvrage {
   matiere            String?
   niveau             String?
   editeurOrigine     String?           // éditeur réel de l'ouvrage — simple info de catalogue, sans lien avec Fournisseur
-  prixAchat          Int               // en unité mineure (ex. centimes de FCFA) — RG-01
+  prixAchat          Int               // en FCFA entier — RG-01
   prixVente          Int               // doit être > prixAchat — RG-01
   quantiteDisponible Int               @default(0) // stock unique, entrepôt de Port-Bouët — RG-02
   seuilAlerte        Int               @default(0)
@@ -283,7 +283,7 @@ model JournalAudit {
 
 ## 5. Notes d'implémentation
 
-- Les montants (`prixAchat`, `prixVente`, `montantHT`, etc.) sont stockés en **entier** (unité mineure) pour éviter les erreurs d'arrondi flottant — cf. `CLAUDE.md` §5.
+- Les montants (`prixAchat`, `prixVente`, `montantHT`, etc.) sont stockés en **entier, en FCFA** (1 unité = 1 FCFA, pas de sous-unité) pour éviter les erreurs d'arrondi flottant — cf. `CLAUDE.md` §5 et décision `.claude/memory.md` (2026-09, unité monétaire de stockage).
 - `quantiteDisponible` sur `Ouvrage` doit être recalculée/mise à jour **dans la même transaction Prisma** que la création du `MouvementStock` correspondant, jamais de façon découplée.
 - Toute contrainte « pas de vente à découvert » (RG-04) est vérifiée dans `src/main/services`, avant l'écriture en base — ne pas se reposer uniquement sur une contrainte SQL.
 - Les entités `Commune` sont pré-remplies par une migration de seed (`prisma/seed.ts`) avec les trois occurrences : Koumassi, Port-Bouët, Marcory.

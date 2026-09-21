@@ -16,6 +16,12 @@
 
 - **Facturation** : pas de facturation normalisée DGI en v1 (documents internes simples) — à réévaluer si le régime fiscal de l'entreprise l'exige. *(cf. dossier d'analyse, périmètre §3.2)*
 
+## 2026-09 — Unité monétaire de stockage
+
+- **Décision** : tous les montants (prix, factures, reversements) sont stockés en **FCFA entier** (1 unité stockée = 1 FCFA), sans sous-unité.
+- **Justification** : le FCFA n'a pas de centime circulant en usage courant en Afrique de l'Ouest ; un modèle « centimes » générique n'apporterait aucune valeur ici et complexifierait inutilement l'affichage et les calculs.
+- **Impact** : `prisma/schema.prisma` (tous les champs monétaires en `Int`), `docs/DATA_MODEL.md`, services de calcul (`prixAchat`, `prixVente`, `montantDu`, remises).
+
 ## Modèle de décision à suivre pour les prochaines entrées
 
 ```

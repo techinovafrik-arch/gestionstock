@@ -28,6 +28,12 @@
 - **Décision** : adapter SQLite = `@prisma/adapter-better-sqlite3` (+ dépendance native `better-sqlite3`). `schema.prisma` ne contient plus que `datasource db { provider = "sqlite" }` (sans `url`) ; la variable `DATABASE_URL` est chargée depuis `.env` via `dotenv/config` dans `prisma.config.ts` et référencée par `env("DATABASE_URL")` (import `env` depuis `prisma/config`, pas depuis le DSL du schéma).
 - **Impact** : `src/main/data` (Phase 1) doit instancier le client ainsi : `new PrismaClient({ adapter: new PrismaBetterSqlite3({ url }) })` — ne pas suivre les exemples Prisma < 7 (`new PrismaClient()` sans adapter, ou `url` dans le schéma), qui ne fonctionnent plus. Voir `prisma.config.ts` et `prisma/schema.prisma`.
 
+## 2026-09 — Utilisateur admin seedé provisoirement (à retirer en Phase 4)
+
+- **Constat** : `MouvementStock` et `BonLivraison` exigent un `utilisateurId` réel (RG-05), mais aucun écran d'authentification n'existe encore (prévu Phase 4, module 8.9).
+- **Décision provisoire** : `prisma/seed.ts` crée un compte `admin` / `admin` (mot de passe hashé scrypt) pour permettre aux services Phase 1 (réception, ajustement) d'attribuer un utilisateur réel aux mouvements de stock.
+- **Impact / à faire en Phase 4** : ce seed automatique d'un compte admin par défaut entre en tension avec `docs/ROADMAP.md` Phase 6 (« création du premier compte administrateur » lors de l'installation). Revoir/retirer ce seed (ou le limiter à l'environnement de dev) une fois l'écran Administration et l'authentification réels implémentés — ne pas livrer un identifiant/mot de passe par défaut connu en production sans forcer son changement.
+
 ## Modèle de décision à suivre pour les prochaines entrées
 
 ```

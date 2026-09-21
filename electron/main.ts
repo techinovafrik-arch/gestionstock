@@ -1,5 +1,7 @@
 import { app, BrowserWindow } from 'electron'
 import path from 'node:path'
+import { prisma } from '../src/main/data/prisma'
+import { enregistrerTousLesHandlersIpc } from '../src/main/ipc'
 
 function createWindow(): void {
   const win = new BrowserWindow({
@@ -20,6 +22,7 @@ function createWindow(): void {
 }
 
 app.whenReady().then(() => {
+  enregistrerTousLesHandlersIpc(prisma)
   createWindow()
 
   app.on('activate', () => {

@@ -49,7 +49,7 @@ export interface MouvementStock {
   typeMouvement: TypeMouvement
   ouvrageId: string
   quantite: number
-  dateMouvement: string
+  dateMouvement: Date
   idDocumentRef: string | null
   utilisateurId: string
   motif: string | null

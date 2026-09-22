@@ -4,30 +4,31 @@
 
 ## Phase courante
 
-- **Phase** : Phase 3 — Règlements & reversement
-- **Statut** : **DoD atteint**. Le reversement généré correspond exactement à Σ(quantité × prixAchat au moment de la vente), vérifié indépendamment de la remise facture appliquée.
+- **Phase** : Phase 4 — Rapports & administration
+- **Statut** : **En cours (1/2)**. Authentification, journal d'audit, sauvegarde/restauration terminés et vérifiés (DoD backup/restore atteint). Tableau de bord (10.1) et rapports (10.9) restent à faire.
 
 ## Dernière action réalisée
 
-- **Correction de modèle importante** : `LigneBonLivraison.prixAchatUnitaire` ajouté pour figer le prix d'achat au moment de la vente (RG-08 l'exige explicitement — le prix d'achat courant de l'ouvrage peut avoir changé depuis via une nouvelle réception). Migration appliquée, `docs/DATA_MODEL.md` mis à jour.
-- Services `reglements.ts` (règlements partiels/complets, transition de statut, état des créances) et `reversement.ts` (génération d'état par période regroupé par ouvrage+prix, clôture RG-10).
-- RG-10 : `annulerBonLivraison` refuse désormais toute annulation dont la date tombe dans une période de reversement clôturée.
-- IPC + écrans Règlements (10.7) et Reversement (10.8).
-- 7 nouveaux tests unitaires (22/22 au total). Vérification de bout en bout sous le vrai binaire Electron (client → BL → facture → règlements partiels/complets → génération reversement exact → clôture → verrou RG-10 confirmé).
+- **Authentification réelle** : remplace le contournement provisoire de la Phase 1 (`services/auth.ts`, session en mémoire mono-poste). Le compte `admin`/`admin` seedé sert désormais de compte de démarrage légitime (première connexion), plus un contournement caché. Contrôle d'accès : seul un `ADMINISTRATEUR` crée des utilisateurs.
+- **Journal d'audit** câblé sur les 3 actions listées par `CLAUDE.md` §6 (ajustement de stock, annulation de BL, modification de prix).
+- **Sauvegarde/restauration** (`src/main/backup.ts`) : copie du fichier SQLite, rétention 15 jours, sauvegarde automatique au démarrage + toutes les 24h. Restauration = copie + redémarrage de l'app.
+- Écrans **Login** et **Administration** (comptes, sauvegarde/restauration, journal d'audit). `App.tsx` gate désormais sur une session valide.
+- 31/31 tests passent. **Vérifié avec le build de production réel** (`electron-vite build` + `electron.exe .`, pas juste le mode dev) : sauvegarde automatique confirmée sur deux redémarrages successifs de l'app, sauvegarde relue avec succès via Prisma.
+- Découverte opérationnelle : `app.getPath('userData')` pointe vers `%APPDATA%\gestion-stock-supernova` pour l'app réelle (pas `%APPDATA%\Electron`, utilisé seulement par nos scripts de smoke test ad hoc) — voir `.claude/memory.md`.
 
 ## Prochaine action
 
-- Phase 4 (`docs/ROADMAP.md`) : tableau de bord (10.1), rapports ventes/marge/créances (10.9), gestion utilisateurs et **authentification réelle** (10.10 — remplacer le compte admin seedé automatiquement, voir `.claude/memory.md`), sauvegarde/restauration, journal d'audit.
+- **Phase 4 (2/2)** : tableau de bord (10.1 — stock disponible, alertes, créances en cours, montant dû à Supernova) et rapports (10.9 — ventes/marge/créances par période, export CSV).
 - Écran Ouvrages (10.2) : modification/désactivation depuis l'UI.
 - Marquer un BL comme livré / l'annuler depuis l'écran Bon de livraison (services existants, pas encore reliés à cet écran).
 
 ## Blocages / décisions en attente
 
 - Aucun blocage technique.
-- Décision en attente côté métier : périodicité exacte de reversement à Supernova (hebdomadaire ou mensuelle) — la génération d'état est déjà paramétrable par période libre, donc cette décision ne bloque pas techniquement ; elle fixera juste la valeur par défaut suggérée à l'écran Reversement.
-- Risque connu et accepté : vulnérabilités npm high severity résiduelles, dev-only, dans des dépendances transitives de la CLI Prisma (support MySQL non utilisé).
-- Point de vigilance Phase 4 : retirer/revoir le seed automatique du compte `admin` une fois l'authentification réelle implémentée.
-- **Rappel opérationnel permanent** : après tout `npm install` touchant `better-sqlite3`, l'ABI native doit être recompilée selon l'usage (`npm run dev`/`build` le font automatiquement via `predev`/`prebuild` ; `npm test` via `pretest`).
+- Décision en attente côté métier : périodicité exacte de reversement à Supernova (hebdomadaire ou mensuelle) — non bloquante techniquement (période libre déjà supportée).
+- Risque connu et accepté : vulnérabilités npm high severity résiduelles, dev-only, dans des dépendances transitives de la CLI Prisma.
+- **Avant mise en production (Phase 6)** : changer le mot de passe du compte `admin` seedé, ou forcer son changement au premier lancement.
+- **Rappel opérationnel permanent** : après tout `npm install` touchant `better-sqlite3`, recompiler l'ABI native selon l'usage (`predev`/`prebuild`/`pretest` s'en chargent automatiquement).
 
 ## Historique des phases
 
@@ -36,7 +37,7 @@
 | Phase 0 — Cadrage technique | Terminée | 2026-09-21 |
 | Phase 1 — Référentiels & stock | DoD atteint | 2026-09-21 |
 | Phase 2 — Ventes & facturation | DoD atteint | 2026-09-22 |
-| Phase 3 — Règlements & reversement | **DoD atteint** | 2026-09-22 |
-| Phase 4 — Rapports & administration | Non démarrée | — |
+| Phase 3 — Règlements & reversement | DoD atteint | 2026-09-22 |
+| Phase 4 — Rapports & administration | **En cours (1/2)** | 2026-09-22 |
 | Phase 5 — Tests & recette | Non démarrée | — |
 | Phase 6 — Packaging & mise en production | Non démarrée | — |

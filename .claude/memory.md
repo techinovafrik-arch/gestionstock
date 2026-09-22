@@ -34,6 +34,18 @@
 - **Décision provisoire** : `prisma/seed.ts` crée un compte `admin` / `admin` (mot de passe hashé scrypt) pour permettre aux services Phase 1 (réception, ajustement) d'attribuer un utilisateur réel aux mouvements de stock.
 - **Impact / à faire en Phase 4** : ce seed automatique d'un compte admin par défaut entre en tension avec `docs/ROADMAP.md` Phase 6 (« création du premier compte administrateur » lors de l'installation). Revoir/retirer ce seed (ou le limiter à l'environnement de dev) une fois l'écran Administration et l'authentification réels implémentés — ne pas livrer un identifiant/mot de passe par défaut connu en production sans forcer son changement.
 
+## 2026-09-22 — better-sqlite3 doit être recompilé pour l'ABI d'Electron (piège critique)
+
+- **Constat** : `npm install` compile les modules natifs (`better-sqlite3`) pour l'ABI de **Node.js**. Or le processus principal Electron embarque son propre Node avec une ABI **différente** (`NODE_MODULE_VERSION` distincte). Résultat : lancer l'app réelle (`npm run dev` / build packagé) sans recompiler fait planter silencieusement toute requête Prisma (`ERR_DLOPEN_FAILED`) — piège d'autant plus sournois que la couche IPC (`versResultat`) avale l'erreur et renvoie juste `ok:false`, donnant l'impression d'un écran vide plutôt que d'un module cassé.
+- **Décision** : ajout de `@electron/rebuild` en devDependency, avec des scripts npm en garde-fou qui recompilent automatiquement le bon ABI selon la commande lancée : `predev`/`prebuild` → `electron-rebuild -f -w better-sqlite3` (ABI Electron) ; `pretest` → `npm rebuild better-sqlite3` (ABI Node, pour Vitest qui tourne sous Node nu). Les deux états ne peuvent pas coexister dans le même `node_modules` : chaque script se charge de remettre le bon état avant de s'exécuter.
+- **Impact** : `package.json` (scripts + devDependency). Si un nouveau script exécute Prisma sous Electron OU sous Node nu, veiller à ce qu'il passe par le bon `pre*` hook (ou lancer `npm rebuild better-sqlite3` / `npx electron-rebuild -f -w better-sqlite3` manuellement selon le contexte).
+
+## 2026-09-22 — Génération PDF : fenêtre cachée, pas offscreen, pas de data: URL
+
+- **Constat** : deux pièges rencontrés en implémentant `src/main/documents/genererPdf.ts`. (1) `loadURL('data:text/html;...')` avec un document HTML de taille normale (quelques Ko) échoue de façon intermittente (`ERR_FAILED`) — remplacé par l'écriture d'un fichier HTML temporaire chargé via `loadFile()`. (2) `new BrowserWindow({ webPreferences: { offscreen: true } })` combiné à `webContents.printToPDF()` a provoqué l'arrêt silencieux du processus (aucune exception, `exit code 0`) lors des tests sur cette machine — remplacé par une fenêtre simplement cachée (`show: false`, sans `offscreen`).
+- **Décision** : ne jamais réintroduire `offscreen: true` ni `loadURL('data:...')` pour la génération de PDF dans ce projet, sauf nouvelle investigation documentée ici.
+- **Impact** : `src/main/documents/genererPdf.ts`.
+
 ## Modèle de décision à suivre pour les prochaines entrées
 
 ```

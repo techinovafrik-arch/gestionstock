@@ -91,6 +91,13 @@ export async function listerBonsLivraison(db: PrismaClient, input: ListerBonsLiv
   })
 }
 
+export async function obtenirBonLivraisonPourImpression(db: PrismaClient, id: string) {
+  return db.bonLivraison.findUniqueOrThrow({
+    where: { id },
+    include: { client: true, communeLivraison: true, lignes: { include: { ouvrage: true } } }
+  })
+}
+
 export async function marquerLivre(db: PrismaClient, id: string) {
   const bonLivraison = await db.bonLivraison.findUniqueOrThrow({ where: { id } })
   if (bonLivraison.statutBL === 'ANNULE') {

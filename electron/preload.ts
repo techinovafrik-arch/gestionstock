@@ -1,12 +1,17 @@
 import { contextBridge, ipcRenderer } from 'electron'
 import type {
   AjusterStockInput,
+  AnnulerBonLivraisonInput,
   ConsulterStockInput,
+  CreerBonLivraisonInput,
   CreerClientInput,
+  CreerFactureInput,
   CreerOuvrageInput,
   CreerReceptionInput,
   HistoriqueStockInput,
+  ListerBonsLivraisonInput,
   ListerClientsInput,
+  ListerFacturesInput,
   ListerOuvragesInput,
   ModifierOuvrageInput
 } from '../src/shared/types'
@@ -36,6 +41,22 @@ const api: Api = {
     consulter: (input: ConsulterStockInput = {}) => ipcRenderer.invoke('stock:consulter', input),
     historique: (input: HistoriqueStockInput = {}) => ipcRenderer.invoke('stock:historique', input),
     ajuster: (input: AjusterStockInput) => ipcRenderer.invoke('stock:ajuster', input)
+  },
+  ventes: {
+    creerBonLivraison: (input: CreerBonLivraisonInput) =>
+      ipcRenderer.invoke('ventes:creerBonLivraison', input),
+    listerBonsLivraison: (input: ListerBonsLivraisonInput = {}) =>
+      ipcRenderer.invoke('ventes:listerBonsLivraison', input),
+    marquerLivre: (input: { id: string }) => ipcRenderer.invoke('ventes:marquerLivre', input),
+    annulerBonLivraison: (input: AnnulerBonLivraisonInput) =>
+      ipcRenderer.invoke('ventes:annulerBonLivraison', input),
+    imprimerBonLivraison: (input: { id: string }) =>
+      ipcRenderer.invoke('ventes:imprimerBonLivraison', input)
+  },
+  facturation: {
+    creer: (input: CreerFactureInput) => ipcRenderer.invoke('facturation:creer', input),
+    lister: (input: ListerFacturesInput = {}) => ipcRenderer.invoke('facturation:lister', input),
+    imprimer: (input: { id: string }) => ipcRenderer.invoke('facturation:imprimer', input)
   }
 }
 

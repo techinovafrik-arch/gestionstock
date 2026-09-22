@@ -2,17 +2,25 @@
 // Source de vérité du contrat renderer ↔ main : preload.ts est vérifié contre cette interface.
 import type {
   AjusterStockInput,
+  AnnulerBonLivraisonInput,
+  BonLivraison,
   Client,
   Commune,
   ConsulterStockInput,
+  CreerBonLivraisonInput,
   CreerClientInput,
+  CreerFactureInput,
   CreerOuvrageInput,
   CreerReceptionInput,
   CreerReceptionOutput,
+  Facture,
   Fournisseur,
   HistoriqueStockInput,
+  ImprimerDocumentOutput,
   IpcResult,
+  ListerBonsLivraisonInput,
   ListerClientsInput,
+  ListerFacturesInput,
   ListerOuvragesInput,
   ModifierOuvrageInput,
   MouvementStock,
@@ -39,5 +47,17 @@ export interface Api {
     consulter(input?: ConsulterStockInput): Promise<IpcResult<StockLigne[]>>
     historique(input?: HistoriqueStockInput): Promise<IpcResult<MouvementStock[]>>
     ajuster(input: AjusterStockInput): Promise<IpcResult<MouvementStock>>
+  }
+  ventes: {
+    creerBonLivraison(input: CreerBonLivraisonInput): Promise<IpcResult<BonLivraison>>
+    listerBonsLivraison(input?: ListerBonsLivraisonInput): Promise<IpcResult<BonLivraison[]>>
+    marquerLivre(input: { id: string }): Promise<IpcResult<BonLivraison>>
+    annulerBonLivraison(input: AnnulerBonLivraisonInput): Promise<IpcResult<BonLivraison>>
+    imprimerBonLivraison(input: { id: string }): Promise<IpcResult<ImprimerDocumentOutput>>
+  }
+  facturation: {
+    creer(input: CreerFactureInput): Promise<IpcResult<Facture>>
+    lister(input?: ListerFacturesInput): Promise<IpcResult<Facture[]>>
+    imprimer(input: { id: string }): Promise<IpcResult<ImprimerDocumentOutput>>
   }
 }

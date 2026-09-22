@@ -5,12 +5,15 @@
   "description": "Gestion de stock et facturation — Distribution Supernova",
   "main": "dist/main/main.js",
   "scripts": {
+    "predev": "electron-rebuild -f -w better-sqlite3",
     "dev": "electron-vite dev",
+    "prebuild": "electron-rebuild -f -w better-sqlite3",
     "build": "electron-vite build",
     "preview": "electron-vite preview",
     "typecheck": "tsc --noEmit -p tsconfig.node.json && tsc --noEmit -p tsconfig.web.json",
     "lint": "eslint .",
     "format": "prettier --write .",
+    "pretest": "npm rebuild better-sqlite3",
     "test": "vitest run",
     "prisma:generate": "prisma generate",
     "prisma:migrate": "prisma migrate dev"
@@ -23,6 +26,7 @@
     "react-dom": "^19.3.0"
   },
   "devDependencies": {
+    "@electron/rebuild": "^4.2.0",
     "@eslint/js": "^10.0.1",
     "@types/better-sqlite3": "^7.6.11",
     "@types/node": "^26.6.2",

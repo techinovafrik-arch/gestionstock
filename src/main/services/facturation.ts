@@ -106,6 +106,13 @@ export async function listerFactures(db: PrismaClient, input: ListerFacturesInpu
   })
 }
 
+export async function obtenirFacturePourImpression(db: PrismaClient, id: string) {
+  return db.facture.findUniqueOrThrow({
+    where: { id },
+    include: { client: true, lignes: { include: { ouvrage: true } } }
+  })
+}
+
 export async function consulterFacture(db: PrismaClient, id: string) {
   return db.facture.findUniqueOrThrow({
     where: { id },

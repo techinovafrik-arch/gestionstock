@@ -290,3 +290,46 @@ export interface EnregistrerVersementInput {
   montantVerse: number
   dateVersement: string
 }
+
+// auth:*
+export interface ConnexionInput {
+  identifiant: string
+  motDePasse: string
+}
+
+export interface ConnexionOutput {
+  utilisateur: UtilisateurPublic
+  token: string
+}
+
+// administration:*
+export interface CreerUtilisateurInput {
+  nom: string
+  identifiant: string
+  motDePasse: string
+  role: RoleUtilisateur
+}
+
+export interface JournalAudit {
+  id: string
+  utilisateurId: string
+  action: string
+  cible: string
+  detail: string | null
+  dateAction: Date
+}
+
+export interface ListerJournalAuditInput {
+  periodeDebut?: string
+  periodeFin?: string
+  utilisateurId?: string
+}
+
+export interface SauvegarderMaintenantOutput {
+  cheminSauvegarde: string
+  dateSauvegarde: string
+}
+
+export interface RestaurerInput {
+  cheminSauvegarde: string
+}

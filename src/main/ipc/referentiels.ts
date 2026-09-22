@@ -15,6 +15,7 @@ import {
   listerUtilisateurs
 } from '../services/referentiels'
 import { creerOuvrage, listerOuvrages, modifierOuvrage } from '../services/ouvrages'
+import { utilisateurCourantIdObligatoire } from '../session'
 import { versResultat } from './resultat'
 
 export function enregistrerHandlersReferentiels(db: PrismaClient): void {
@@ -25,7 +26,7 @@ export function enregistrerHandlersReferentiels(db: PrismaClient): void {
     versResultat(() => creerOuvrage(db, input))
   )
   ipcMain.handle('referentiels:modifierOuvrage', (_event, input: ModifierOuvrageInput) =>
-    versResultat(() => modifierOuvrage(db, input))
+    versResultat(() => modifierOuvrage(db, utilisateurCourantIdObligatoire(), input))
   )
   ipcMain.handle('referentiels:listerFournisseurs', () =>
     versResultat(() => listerFournisseurs(db))

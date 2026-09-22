@@ -88,6 +88,7 @@ Convention de nommage des canaux : `domaine:action` (ex. `stock:ajuster`, `vente
 |---|---|---|
 | `administration:creerUtilisateur` | `{ nom; identifiant; motDePasse; role }` | `Utilisateur` |
 | `administration:sauvegarderMaintenant` | `{}` | `{ cheminSauvegarde: string; dateSauvegarde: string }` |
+| `administration:listerSauvegardes` | `{}` | `string[]` (chemins complets, du plus récent au plus ancien) |
 | `administration:restaurer` | `{ cheminSauvegarde: string }` | `{ ok: true }` |
 | `administration:journalAudit` | `{ periodeDebut?; periodeFin?; utilisateurId? }` | `JournalAudit[]` |
 

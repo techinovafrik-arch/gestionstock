@@ -8,6 +8,7 @@ describe('services/ouvrages — RG-01', () => {
   let db: PrismaClient
   let fermer: () => Promise<void>
   let fournisseurId: string
+  let utilisateurId: string
 
   beforeAll(async () => {
     const base = creerBaseDeTest()
@@ -15,6 +16,7 @@ describe('services/ouvrages — RG-01', () => {
     fermer = base.fermer
     const fixtures = await creerFixturesDeBase(db)
     fournisseurId = fixtures.fournisseur.id
+    utilisateurId = fixtures.utilisateur.id
   })
 
   afterAll(async () => {
@@ -52,8 +54,8 @@ describe('services/ouvrages — RG-01', () => {
       fournisseurId
     })
 
-    await expect(modifierOuvrage(db, { id: ouvrage.id, prixAchat: 2000 })).rejects.toThrow(
-      ErreurMetier
-    )
+    await expect(
+      modifierOuvrage(db, utilisateurId, { id: ouvrage.id, prixAchat: 2000 })
+    ).rejects.toThrow(ErreurMetier)
   })
 })

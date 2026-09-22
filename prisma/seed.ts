@@ -1,13 +1,7 @@
 import 'dotenv/config'
 import { PrismaBetterSqlite3 } from '@prisma/adapter-better-sqlite3'
 import { PrismaClient } from '@prisma/client'
-import { randomBytes, scryptSync } from 'node:crypto'
-
-function hashMotDePasse(motDePasse: string): string {
-  const sel = randomBytes(16).toString('hex')
-  const hash = scryptSync(motDePasse, sel, 64).toString('hex')
-  return `${sel}:${hash}`
-}
+import { hashMotDePasse } from '../src/main/services/motDePasse'
 
 async function main(): Promise<void> {
   const adapter = new PrismaBetterSqlite3({ url: process.env.DATABASE_URL! })

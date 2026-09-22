@@ -14,15 +14,12 @@ import {
 } from '../services/ventes'
 import { gabaritBonLivraison } from '../documents/templates/bonLivraison'
 import { genererPdfDepuisHtml } from '../documents/genererPdf'
-import { getCurrentUserId } from '../session'
+import { utilisateurCourantIdObligatoire } from '../session'
 import { versResultat } from './resultat'
 
 export function enregistrerHandlersVentes(db: PrismaClient): void {
   ipcMain.handle('ventes:creerBonLivraison', (_event, input: CreerBonLivraisonInput) =>
-    versResultat(async () => {
-      const utilisateurId = await getCurrentUserId(db)
-      return creerBonLivraison(db, utilisateurId, input)
-    })
+    versResultat(() => creerBonLivraison(db, utilisateurCourantIdObligatoire(), input))
   )
   ipcMain.handle('ventes:listerBonsLivraison', (_event, input: ListerBonsLivraisonInput) =>
     versResultat(() => listerBonsLivraison(db, input))
@@ -31,10 +28,7 @@ export function enregistrerHandlersVentes(db: PrismaClient): void {
     versResultat(() => marquerLivre(db, input.id))
   )
   ipcMain.handle('ventes:annulerBonLivraison', (_event, input: AnnulerBonLivraisonInput) =>
-    versResultat(async () => {
-      const utilisateurId = await getCurrentUserId(db)
-      return annulerBonLivraison(db, utilisateurId, input)
-    })
+    versResultat(() => annulerBonLivraison(db, utilisateurCourantIdObligatoire(), input))
   )
   ipcMain.handle('ventes:imprimerBonLivraison', (_event, input: { id: string }) =>
     versResultat(async () => {

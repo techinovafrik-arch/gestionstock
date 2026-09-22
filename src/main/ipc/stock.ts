@@ -6,7 +6,7 @@ import type {
   HistoriqueStockInput
 } from '../../shared/types'
 import { ajusterStock, consulterStock, historiqueMouvements } from '../services/stock'
-import { getCurrentUserId } from '../session'
+import { utilisateurCourantIdObligatoire } from '../session'
 import { versResultat } from './resultat'
 
 export function enregistrerHandlersStock(db: PrismaClient): void {
@@ -17,9 +17,6 @@ export function enregistrerHandlersStock(db: PrismaClient): void {
     versResultat(() => historiqueMouvements(db, input))
   )
   ipcMain.handle('stock:ajuster', (_event, input: AjusterStockInput) =>
-    versResultat(async () => {
-      const utilisateurId = await getCurrentUserId(db)
-      return ajusterStock(db, utilisateurId, input)
-    })
+    versResultat(() => ajusterStock(db, utilisateurCourantIdObligatoire(), input))
   )
 }

@@ -80,7 +80,7 @@ describe('services/reversement — RG-08, RG-09, RG-10', () => {
     })
 
     // Nouvelle réception à un prix d'achat différent avant la seconde vente.
-    await modifierOuvrage(db, { id: ouvrage.id, prixVente: 1600 })
+    await modifierOuvrage(db, utilisateurId, { id: ouvrage.id, prixVente: 1600 })
     await enregistrerReception(db, utilisateurId, {
       lignes: [{ ouvrageId: ouvrage.id, quantite: 50, prixAchat: 950 }]
     })

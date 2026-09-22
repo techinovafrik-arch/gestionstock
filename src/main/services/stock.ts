@@ -7,6 +7,7 @@ import type {
   StockLigne
 } from '../../shared/types'
 import { ErreurMetier } from './erreurs'
+import { journaliser } from './journalAudit'
 
 // RG-02 : le stock est unique par ouvrage (Ouvrage.quantiteDisponible), jamais ventilé par
 // commune ou par dépôt — ce service n'introduit et ne doit jamais introduire de dimension
@@ -95,7 +96,7 @@ export async function ajusterStock(
       data: { quantiteDisponible: nouvelleQuantite }
     })
 
-    return tx.mouvementStock.create({
+    const mouvement = await tx.mouvementStock.create({
       data: {
         typeMouvement: 'AJUSTEMENT',
         ouvrageId: input.ouvrageId,
@@ -104,6 +105,15 @@ export async function ajusterStock(
         motif: input.motif
       }
     })
+
+    await journaliser(tx, {
+      utilisateurId,
+      action: 'AJUSTEMENT_STOCK',
+      cible: `Ouvrage:${input.ouvrageId}`,
+      detail: `${input.sens} ${input.quantite} — ${input.motif}`
+    })
+
+    return mouvement
   })
 }
 

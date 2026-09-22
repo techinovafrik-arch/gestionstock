@@ -2,12 +2,14 @@ import { contextBridge, ipcRenderer } from 'electron'
 import type {
   AjusterStockInput,
   AnnulerBonLivraisonInput,
+  ConnexionInput,
   ConsulterStockInput,
   CreerBonLivraisonInput,
   CreerClientInput,
   CreerFactureInput,
   CreerOuvrageInput,
   CreerReceptionInput,
+  CreerUtilisateurInput,
   EnregistrerReglementInput,
   EnregistrerVersementInput,
   GenererEtatReversementInput,
@@ -16,8 +18,10 @@ import type {
   ListerClientsInput,
   ListerCreancesInput,
   ListerFacturesInput,
+  ListerJournalAuditInput,
   ListerOuvragesInput,
-  ModifierOuvrageInput
+  ModifierOuvrageInput,
+  RestaurerInput
 } from '../src/shared/types'
 import type { Api } from '../src/shared/api'
 
@@ -73,6 +77,20 @@ const api: Api = {
     enregistrerVersement: (input: EnregistrerVersementInput) =>
       ipcRenderer.invoke('reversement:enregistrerVersement', input),
     lister: () => ipcRenderer.invoke('reversement:lister')
+  },
+  auth: {
+    connexion: (input: ConnexionInput) => ipcRenderer.invoke('auth:connexion', input),
+    deconnexion: () => ipcRenderer.invoke('auth:deconnexion'),
+    sessionCourante: () => ipcRenderer.invoke('auth:sessionCourante')
+  },
+  administration: {
+    creerUtilisateur: (input: CreerUtilisateurInput) =>
+      ipcRenderer.invoke('administration:creerUtilisateur', input),
+    sauvegarderMaintenant: () => ipcRenderer.invoke('administration:sauvegarderMaintenant'),
+    listerSauvegardes: () => ipcRenderer.invoke('administration:listerSauvegardes'),
+    restaurer: (input: RestaurerInput) => ipcRenderer.invoke('administration:restaurer', input),
+    journalAudit: (input: ListerJournalAuditInput = {}) =>
+      ipcRenderer.invoke('administration:journalAudit', input)
   }
 }
 

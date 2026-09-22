@@ -5,6 +5,7 @@ import type {
   ModifierOuvrageInput
 } from '../../shared/types'
 import { ErreurMetier } from './erreurs'
+import { journaliser } from './journalAudit'
 
 function verifierCoherencePrix(prixAchat: number, prixVente: number): void {
   // RG-01 : le prix de vente doit toujours être strictement supérieur au prix d'achat.
@@ -34,14 +35,18 @@ export async function creerOuvrage(db: PrismaClient, input: CreerOuvrageInput) {
   })
 }
 
-export async function modifierOuvrage(db: PrismaClient, input: ModifierOuvrageInput) {
+export async function modifierOuvrage(
+  db: PrismaClient,
+  utilisateurId: string,
+  input: ModifierOuvrageInput
+) {
   const existant = await db.ouvrage.findUniqueOrThrow({ where: { id: input.id } })
 
   const prixAchat = input.prixAchat ?? existant.prixAchat
   const prixVente = input.prixVente ?? existant.prixVente
   verifierCoherencePrix(prixAchat, prixVente)
 
-  return db.ouvrage.update({
+  const ouvrage = await db.ouvrage.update({
     where: { id: input.id },
     data: {
       titre: input.titre,
@@ -55,6 +60,18 @@ export async function modifierOuvrage(db: PrismaClient, input: ModifierOuvrageIn
       actif: input.actif
     }
   })
+
+  // CLAUDE.md §6 : toute modification de prix est tracée.
+  if (prixAchat !== existant.prixAchat || prixVente !== existant.prixVente) {
+    await journaliser(db, {
+      utilisateurId,
+      action: 'MODIFICATION_PRIX',
+      cible: `Ouvrage:${input.id}`,
+      detail: `prixAchat ${existant.prixAchat}→${prixAchat}, prixVente ${existant.prixVente}→${prixVente}`
+    })
+  }
+
+  return ouvrage
 }
 
 export async function listerOuvrages(db: PrismaClient, input: ListerOuvragesInput = {}) {

@@ -6,6 +6,8 @@ import type {
   BonLivraison,
   Client,
   Commune,
+  ConnexionInput,
+  ConnexionOutput,
   ConsulterStockInput,
   Creance,
   CreerBonLivraisonInput,
@@ -14,6 +16,7 @@ import type {
   CreerOuvrageInput,
   CreerReceptionInput,
   CreerReceptionOutput,
+  CreerUtilisateurInput,
   EnregistrerReglementInput,
   EnregistrerReglementOutput,
   EnregistrerVersementInput,
@@ -23,15 +26,19 @@ import type {
   HistoriqueStockInput,
   ImprimerDocumentOutput,
   IpcResult,
+  JournalAudit,
   ListerBonsLivraisonInput,
   ListerClientsInput,
   ListerCreancesInput,
   ListerFacturesInput,
+  ListerJournalAuditInput,
   ListerOuvragesInput,
   ModifierOuvrageInput,
   MouvementStock,
   Ouvrage,
+  RestaurerInput,
   Reversement,
+  SauvegarderMaintenantOutput,
   StockLigne,
   UtilisateurPublic
 } from './types'
@@ -75,5 +82,17 @@ export interface Api {
     genererEtat(input: GenererEtatReversementInput): Promise<IpcResult<Reversement>>
     enregistrerVersement(input: EnregistrerVersementInput): Promise<IpcResult<Reversement>>
     lister(): Promise<IpcResult<Reversement[]>>
+  }
+  auth: {
+    connexion(input: ConnexionInput): Promise<IpcResult<ConnexionOutput>>
+    deconnexion(): Promise<IpcResult<{ ok: true }>>
+    sessionCourante(): Promise<IpcResult<UtilisateurPublic | null>>
+  }
+  administration: {
+    creerUtilisateur(input: CreerUtilisateurInput): Promise<IpcResult<UtilisateurPublic>>
+    sauvegarderMaintenant(): Promise<IpcResult<SauvegarderMaintenantOutput>>
+    listerSauvegardes(): Promise<IpcResult<string[]>>
+    restaurer(input: RestaurerInput): Promise<IpcResult<{ ok: true }>>
+    journalAudit(input?: ListerJournalAuditInput): Promise<IpcResult<JournalAudit[]>>
   }
 }

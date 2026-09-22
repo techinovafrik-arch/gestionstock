@@ -57,6 +57,24 @@
 - **Décision** : `services/ventes.ts` `annulerBonLivraison` vérifie qu'aucun `Reversement` `CLOTURE` ne couvre la `dateBL` du bon avant d'autoriser l'annulation (code d'erreur `PERIODE_CLOTUREE`, conforme à `docs/API_CONTRACT.md`). Aucun autre point de mutation des ventes n'existe à ce stade (pas de modification de BL hors annulation), donc ce seul point de contrôle suffit à honorer RG-10 pour l'instant.
 - **Impact** : si un futur module permet de modifier une vente autrement (ex. correction de ligne), il devra reprendre la même vérification.
 
+## 2026-09-22 — Authentification réelle : le compte admin seedé retrouve son rôle prévu
+
+- **Décision** : implémentation d'une vraie authentification (`services/auth.ts`, session en mémoire dans `src/main/session.ts`, un seul utilisateur connecté à la fois — cohérent avec l'app mono-poste). Le contournement provisoire (`getCurrentUserId` qui utilisait toujours le compte admin sans connexion) est supprimé ; tous les IPC exigeant un utilisateur tracé (RG-05) appellent désormais `utilisateurCourantIdObligatoire()`, qui lève `NON_AUTHENTIFIE` en l'absence de session.
+- **Résolution de la tension notée le 2026-09-22 (Phase 1)** : le compte `admin`/`admin` seedé (`prisma/seed.ts`) n'est plus contourné — il redevient ce qu'il aurait toujours dû être : le compte de démarrage à utiliser pour la première connexion (résout le problème d'amorçage : il faut un compte pour créer les autres comptes). Toujours à changer/documenter avant mise en production réelle (Phase 6).
+- **Contrôle d'accès** : `administration:creerUtilisateur` exige que l'utilisateur courant ait le rôle `ADMINISTRATEUR` (`services/administration.ts`).
+- **Impact** : `src/main/session.ts` (réécrit), `services/auth.ts`, `services/administration.ts`, tous les handlers IPC mutants (stock, receptions, ventes, referentiels:modifierOuvrage), `src/renderer/app.tsx` (gate de connexion), nouvel écran `Login`.
+
+## 2026-09-22 — Journal d'audit câblé sur les 3 actions citées par CLAUDE.md §6
+
+- **Décision** : `journaliser()` (`services/journalAudit.ts`) est appelé dans exactement les trois cas explicitement cités par CLAUDE.md §6 : ajustement de stock (`AJUSTEMENT_STOCK`), annulation de bon de livraison (`ANNULATION_BL`), modification de prix d'un ouvrage (`MODIFICATION_PRIX`, uniquement si prixAchat/prixVente changent réellement). `modifierOuvrage` a changé de signature pour accepter `utilisateurId` (nécessaire à la traçabilité) — tous les appels existants (tests, IPC) ont été mis à jour.
+- **Non fait volontairement** : pas de journalisation sur l'annulation de facture (fonctionnalité elle-même non implémentée à ce stade) ni sur les créations simples (RG-05 couvre déjà la traçabilité des mouvements de stock via `MouvementStock`, la duplication dans `JournalAudit` n'apporterait rien).
+
+## 2026-09-22 — Sauvegarde automatique : nom du dossier userData dépend de package.json
+
+- **Constat pratique** : `app.getPath('userData')` résout vers `%APPDATA%\Electron` quand Electron est lancé sur un script arbitraire (ex. nos smoke tests `electron.exe script.cjs`), mais vers `%APPDATA%\<name du package.json>` (ici `gestion-stock-supernova`) quand il charge le vrai `package.json` de l'app (`electron.exe .` ou l'app empaquetée). Les sauvegardes de l'app réelle sont donc dans `%APPDATA%\gestion-stock-supernova\backups`, pas `%APPDATA%\Electron\backups`.
+- **Vérifié** : deux lancements successifs de l'app réelle (build production, `electron.exe .`) ont chacun produit une sauvegarde automatique au démarrage ; une copie d'une sauvegarde a été relue avec succès via Prisma (communes, fournisseur, utilisateur admin intacts).
+- **Impact** : `src/main/backup.ts`, `electron/main.ts` (`demarrerSauvegardeAutomatique`). À revoir en Phase 6 si un `productName` différent est fixé dans la configuration `electron-builder`.
+
 ## Modèle de décision à suivre pour les prochaines entrées
 
 ```

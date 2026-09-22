@@ -6,6 +6,7 @@ import type {
 } from '../../shared/types'
 import { ErreurMetier } from './erreurs'
 import { genererNumeroBonLivraison } from './numerotation'
+import { journaliser } from './journalAudit'
 
 // RG-06 : un bon de livraison est obligatoire pour toute sortie de stock ; la commune de
 // livraison est purement descriptive et n'intervient jamais dans le calcul du stock (RG-02).
@@ -181,10 +182,19 @@ export async function annulerBonLivraison(
       })
     }
 
-    return tx.bonLivraison.update({
+    const annule = await tx.bonLivraison.update({
       where: { id: input.id },
       data: { statutBL: 'ANNULE', motifAnnulation: input.motif },
       include: { lignes: true }
     })
+
+    await journaliser(tx, {
+      utilisateurId,
+      action: 'ANNULATION_BL',
+      cible: `BonLivraison:${bonLivraison.id}`,
+      detail: `${bonLivraison.numeroBL} — ${input.motif}`
+    })
+
+    return annule
   })
 }

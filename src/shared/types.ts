@@ -6,6 +6,8 @@ export type IpcResult<T> =
 
 export type TypeMouvement = 'RECEPTION' | 'VENTE' | 'RETOUR' | 'AJUSTEMENT'
 export type RoleUtilisateur = 'ADMINISTRATEUR' | 'OPERATEUR'
+export type StatutBonLivraison = 'EMIS' | 'LIVRE' | 'FACTURE' | 'ANNULE'
+export type StatutPaiement = 'EMISE' | 'PARTIELLE' | 'REGLEE' | 'ANNULEE'
 
 export interface Ouvrage {
   id: string
@@ -142,4 +144,83 @@ export interface AjusterStockInput {
   quantite: number
   sens: 'PLUS' | 'MOINS'
   motif: string
+}
+
+// ventes:*
+export interface LigneBonLivraison {
+  id: string
+  ouvrageId: string
+  quantite: number
+  prixVenteUnitaire: number
+}
+
+export interface BonLivraison {
+  id: string
+  numeroBL: string
+  dateBL: Date
+  clientId: string
+  communeLivraisonId: string
+  adresseLivraison: string | null
+  statutBL: StatutBonLivraison
+  utilisateurId: string
+  motifAnnulation: string | null
+  lignes: LigneBonLivraison[]
+}
+
+export interface CreerBonLivraisonInput {
+  clientId: string
+  communeLivraisonId: string
+  adresseLivraison?: string
+  lignes: { ouvrageId: string; quantite: number; prixVenteUnitaire: number }[]
+}
+
+export interface ListerBonsLivraisonInput {
+  statut?: StatutBonLivraison
+  clientId?: string
+  periodeDebut?: string
+  periodeFin?: string
+  nonFactures?: boolean
+}
+
+export interface AnnulerBonLivraisonInput {
+  id: string
+  motif: string
+}
+
+// facturation:*
+export interface LigneFacture {
+  id: string
+  ouvrageId: string
+  quantite: number
+  prixUnitaire: number
+  montantLigne: number
+}
+
+export interface Facture {
+  id: string
+  numeroFacture: string
+  dateFacture: Date
+  clientId: string
+  montantHT: number
+  remise: number
+  montantTotal: number
+  statutPaiement: StatutPaiement
+  lignes: LigneFacture[]
+}
+
+export interface CreerFactureInput {
+  clientId: string
+  bonsLivraisonIds: string[]
+  remise?: number
+}
+
+export interface ListerFacturesInput {
+  statutPaiement?: StatutPaiement
+  clientId?: string
+  periodeDebut?: string
+  periodeFin?: string
+}
+
+export interface ImprimerDocumentOutput {
+  cheminPdf: string
 }

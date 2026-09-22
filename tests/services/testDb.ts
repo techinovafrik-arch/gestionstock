@@ -44,5 +44,8 @@ export async function creerFixturesDeBase(db: PrismaClient) {
       role: 'OPERATEUR'
     }
   })
-  return { fournisseur, commune, utilisateur }
+  const client = await db.client.create({
+    data: { nom: 'Établissement Test', typeClient: 'etablissement_scolaire', communeId: commune.id }
+  })
+  return { fournisseur, commune, utilisateur, client }
 }

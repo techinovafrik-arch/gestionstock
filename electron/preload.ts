@@ -8,9 +8,13 @@ import type {
   CreerFactureInput,
   CreerOuvrageInput,
   CreerReceptionInput,
+  EnregistrerReglementInput,
+  EnregistrerVersementInput,
+  GenererEtatReversementInput,
   HistoriqueStockInput,
   ListerBonsLivraisonInput,
   ListerClientsInput,
+  ListerCreancesInput,
   ListerFacturesInput,
   ListerOuvragesInput,
   ModifierOuvrageInput
@@ -57,6 +61,18 @@ const api: Api = {
     creer: (input: CreerFactureInput) => ipcRenderer.invoke('facturation:creer', input),
     lister: (input: ListerFacturesInput = {}) => ipcRenderer.invoke('facturation:lister', input),
     imprimer: (input: { id: string }) => ipcRenderer.invoke('facturation:imprimer', input)
+  },
+  reglements: {
+    enregistrer: (input: EnregistrerReglementInput) =>
+      ipcRenderer.invoke('reglements:enregistrer', input),
+    creances: (input: ListerCreancesInput = {}) => ipcRenderer.invoke('reglements:creances', input)
+  },
+  reversement: {
+    genererEtat: (input: GenererEtatReversementInput) =>
+      ipcRenderer.invoke('reversement:genererEtat', input),
+    enregistrerVersement: (input: EnregistrerVersementInput) =>
+      ipcRenderer.invoke('reversement:enregistrerVersement', input),
+    lister: () => ipcRenderer.invoke('reversement:lister')
   }
 }
 

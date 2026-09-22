@@ -7,24 +7,31 @@ import type {
   Client,
   Commune,
   ConsulterStockInput,
+  Creance,
   CreerBonLivraisonInput,
   CreerClientInput,
   CreerFactureInput,
   CreerOuvrageInput,
   CreerReceptionInput,
   CreerReceptionOutput,
+  EnregistrerReglementInput,
+  EnregistrerReglementOutput,
+  EnregistrerVersementInput,
   Facture,
   Fournisseur,
+  GenererEtatReversementInput,
   HistoriqueStockInput,
   ImprimerDocumentOutput,
   IpcResult,
   ListerBonsLivraisonInput,
   ListerClientsInput,
+  ListerCreancesInput,
   ListerFacturesInput,
   ListerOuvragesInput,
   ModifierOuvrageInput,
   MouvementStock,
   Ouvrage,
+  Reversement,
   StockLigne,
   UtilisateurPublic
 } from './types'
@@ -59,5 +66,14 @@ export interface Api {
     creer(input: CreerFactureInput): Promise<IpcResult<Facture>>
     lister(input?: ListerFacturesInput): Promise<IpcResult<Facture[]>>
     imprimer(input: { id: string }): Promise<IpcResult<ImprimerDocumentOutput>>
+  }
+  reglements: {
+    enregistrer(input: EnregistrerReglementInput): Promise<IpcResult<EnregistrerReglementOutput>>
+    creances(input?: ListerCreancesInput): Promise<IpcResult<Creance[]>>
+  }
+  reversement: {
+    genererEtat(input: GenererEtatReversementInput): Promise<IpcResult<Reversement>>
+    enregistrerVersement(input: EnregistrerVersementInput): Promise<IpcResult<Reversement>>
+    lister(): Promise<IpcResult<Reversement[]>>
   }
 }

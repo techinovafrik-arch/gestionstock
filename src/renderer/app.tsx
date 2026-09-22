@@ -4,8 +4,17 @@ import { ReceptionsScreen } from './screens/Receptions/ReceptionsScreen'
 import { StockScreen } from './screens/Stock/StockScreen'
 import { NouveauBonLivraisonScreen } from './screens/BonLivraison/Nouveau/NouveauBonLivraisonScreen'
 import { FacturationScreen } from './screens/Facturation/FacturationScreen'
+import { ReglementsScreen } from './screens/Reglements/ReglementsScreen'
+import { ReversementScreen } from './screens/Reversement/ReversementScreen'
 
-type Onglet = 'ouvrages' | 'receptions' | 'stock' | 'bonLivraison' | 'facturation'
+type Onglet =
+  | 'ouvrages'
+  | 'receptions'
+  | 'stock'
+  | 'bonLivraison'
+  | 'facturation'
+  | 'reglements'
+  | 'reversement'
 
 export function App(): JSX.Element {
   const [onglet, setOnglet] = useState<Onglet>('ouvrages')
@@ -30,6 +39,12 @@ export function App(): JSX.Element {
         <button onClick={() => setOnglet('facturation')} disabled={onglet === 'facturation'}>
           Facturation
         </button>
+        <button onClick={() => setOnglet('reglements')} disabled={onglet === 'reglements'}>
+          Règlements
+        </button>
+        <button onClick={() => setOnglet('reversement')} disabled={onglet === 'reversement'}>
+          Reversement
+        </button>
       </nav>
 
       {onglet === 'ouvrages' && <OuvragesScreen />}
@@ -37,6 +52,8 @@ export function App(): JSX.Element {
       {onglet === 'stock' && <StockScreen />}
       {onglet === 'bonLivraison' && <NouveauBonLivraisonScreen />}
       {onglet === 'facturation' && <FacturationScreen />}
+      {onglet === 'reglements' && <ReglementsScreen />}
+      {onglet === 'reversement' && <ReversementScreen />}
     </main>
   )
 }

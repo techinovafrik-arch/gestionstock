@@ -24,6 +24,12 @@ export async function creerBonLivraison(
   return db.$transaction(async (tx) => {
     // RG-04 : aucune vente ne peut faire passer le stock disponible d'un ouvrage sous zéro,
     // quelle que soit la commune de livraison — vérifié avant toute écriture.
+    // On en profite pour figer le prixAchat courant de chaque ouvrage (RG-08 : le montant dû
+    // à Supernova se base sur le prix d'achat AU MOMENT DE LA VENTE, jamais recalculé plus tard).
+    const ouvragesParId = new Map<
+      string,
+      { titre: string; quantiteDisponible: number; prixAchat: number }
+    >()
     for (const ligne of input.lignes) {
       const ouvrage = await tx.ouvrage.findUniqueOrThrow({ where: { id: ligne.ouvrageId } })
       if (ouvrage.quantiteDisponible < ligne.quantite) {
@@ -32,6 +38,7 @@ export async function creerBonLivraison(
           `Stock insuffisant pour "${ouvrage.titre}" (disponible : ${ouvrage.quantiteDisponible}, demandé : ${ligne.quantite}).`
         )
       }
+      ouvragesParId.set(ligne.ouvrageId, ouvrage)
     }
 
     const numeroBL = await genererNumeroBonLivraison(tx)
@@ -47,7 +54,8 @@ export async function creerBonLivraison(
           create: input.lignes.map((ligne) => ({
             ouvrageId: ligne.ouvrageId,
             quantite: ligne.quantite,
-            prixVenteUnitaire: ligne.prixVenteUnitaire
+            prixVenteUnitaire: ligne.prixVenteUnitaire,
+            prixAchatUnitaire: ouvragesParId.get(ligne.ouvrageId)!.prixAchat
           }))
         }
       },
@@ -138,6 +146,21 @@ export async function annulerBonLivraison(
       throw new ErreurMetier(
         'DEJA_FACTURE',
         'Ce bon de livraison est déjà facturé et ne peut plus être annulé.'
+      )
+    }
+
+    // RG-10 : une fois un reversement clôturé, les ventes de sa période sont verrouillées.
+    const periodeCloturee = await tx.reversement.findFirst({
+      where: {
+        statutReversement: 'CLOTURE',
+        periodeDebut: { lte: bonLivraison.dateBL },
+        periodeFin: { gte: bonLivraison.dateBL }
+      }
+    })
+    if (periodeCloturee) {
+      throw new ErreurMetier(
+        'PERIODE_CLOTUREE',
+        'La période de reversement couvrant ce bon de livraison est déjà clôturée.'
       )
     }
 

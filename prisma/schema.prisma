@@ -126,6 +126,7 @@ model LigneBonLivraison {
   ouvrage           Ouvrage      @relation(fields: [ouvrageId], references: [id])
   quantite          Int
   prixVenteUnitaire Int
+  prixAchatUnitaire Int
 }
 
 model Facture {

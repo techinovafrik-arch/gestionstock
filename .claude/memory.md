@@ -46,6 +46,17 @@
 - **Décision** : ne jamais réintroduire `offscreen: true` ni `loadURL('data:...')` pour la génération de PDF dans ce projet, sauf nouvelle investigation documentée ici.
 - **Impact** : `src/main/documents/genererPdf.ts`.
 
+## 2026-09-22 — RG-08 : prixAchat figé sur LigneBonLivraison (pas seulement LigneReversement)
+
+- **Constat** : le schéma de référence initial (`docs/DATA_MODEL.md` v1) ne figeait le prix d'achat que sur `LigneReversement`, censé être calculé au moment du reversement. Mais RG-08 exige explicitement le prix « au moment de la vente », qui peut différer du prix d'achat courant de l'ouvrage si une réception à un nouveau prix a eu lieu entre la vente et la génération du reversement — l'information était donc perdue.
+- **Décision** : ajout de `LigneBonLivraison.prixAchatUnitaire` (figé à `Ouvrage.prixAchat` au moment de `creerBonLivraison`, dans la même transaction que le contrôle de stock RG-04). `genererEtatReversement` regroupe les lignes par `(ouvrageId, prixAchatUnitaire)` — si le prix a varié en cours de période, plusieurs `LigneReversement` sont produites pour le même ouvrage plutôt qu'un prix moyen approximatif.
+- **Impact** : `prisma/schema.prisma`, `docs/DATA_MODEL.md` (§3 et §5), `services/ventes.ts` (creerBonLivraison), `services/reversement.ts`. Migration `20260922175918_ligne_bl_prix_achat_fige`.
+
+## 2026-09-22 — RG-10 : verrouillage implémenté dans `annulerBonLivraison`
+
+- **Décision** : `services/ventes.ts` `annulerBonLivraison` vérifie qu'aucun `Reversement` `CLOTURE` ne couvre la `dateBL` du bon avant d'autoriser l'annulation (code d'erreur `PERIODE_CLOTUREE`, conforme à `docs/API_CONTRACT.md`). Aucun autre point de mutation des ventes n'existe à ce stade (pas de modification de BL hors annulation), donc ce seul point de contrôle suffit à honorer RG-10 pour l'instant.
+- **Impact** : si un futur module permet de modifier une vente autrement (ex. correction de ligne), il devra reprendre la même vérification.
+
 ## Modèle de décision à suivre pour les prochaines entrées
 
 ```

@@ -176,6 +176,7 @@ model LigneBonLivraison {
   ouvrage           Ouvrage       @relation(fields: [ouvrageId], references: [id])
   quantite          Int
   prixVenteUnitaire Int
+  prixAchatUnitaire Int           // figé au moment de la vente — RG-08 (voir §4)
 }
 
 model Facture {
@@ -278,7 +279,8 @@ model JournalAudit {
 | `typeMouvement` | `MouvementStock` | `RECEPTION`, `VENTE`, `RETOUR`, `AJUSTEMENT` uniquement |
 | `numeroBL` / `numeroFacture` | `BonLivraison` / `Facture` | séquentiel, unique, non modifiable après création (RG-11) |
 | `communeLivraisonId` | `BonLivraison` | destination logistique uniquement — sans effet sur le stock (RG-06) |
-| `prixAchatUnitaire` | `LigneReversement` | figé à la valeur du moment de la vente, indépendant du prix de vente pratiqué (RG-08) |
+| `prixAchatUnitaire` | `LigneBonLivraison` | figé à `Ouvrage.prixAchat` au moment de la création du BL — source de vérité pour RG-08, jamais recalculé depuis le prix d'achat courant de l'ouvrage |
+| `prixAchatUnitaire` | `LigneReversement` | repris de `LigneBonLivraison.prixAchatUnitaire` ; indépendant du prix de vente pratiqué et de la remise (RG-08) |
 | `statutReversement` | `Reversement` | passage à `CLOTURE` verrouille les ventes de la période (RG-10) |
 
 ## 5. Notes d'implémentation
@@ -286,4 +288,6 @@ model JournalAudit {
 - Les montants (`prixAchat`, `prixVente`, `montantHT`, etc.) sont stockés en **entier, en FCFA** (1 unité = 1 FCFA, pas de sous-unité) pour éviter les erreurs d'arrondi flottant — cf. `CLAUDE.md` §5 et décision `.claude/memory.md` (2026-09, unité monétaire de stockage).
 - `quantiteDisponible` sur `Ouvrage` doit être recalculée/mise à jour **dans la même transaction Prisma** que la création du `MouvementStock` correspondant, jamais de façon découplée.
 - Toute contrainte « pas de vente à découvert » (RG-04) est vérifiée dans `src/main/services`, avant l'écriture en base — ne pas se reposer uniquement sur une contrainte SQL.
+- Génération du reversement (RG-08) : regrouper les `LigneBonLivraison` de la période par `(ouvrageId, prixAchatUnitaire)` plutôt que par seul `ouvrageId` — si le prix d'achat a changé en cours de période (nouvelle réception), cela produit plusieurs `LigneReversement` pour un même ouvrage, chacune exacte, plutôt qu'un prix moyen qui fausserait la traçabilité.
+- RG-10 (verrouillage) : toute tentative d'annulation d'un `BonLivraison` dont la `dateBL` tombe dans une période de `Reversement` déjà `CLOTURE` doit être rejetée (code d'erreur `PERIODE_CLOTUREE`, cf. `docs/API_CONTRACT.md`).
 - Les entités `Commune` sont pré-remplies par une migration de seed (`prisma/seed.ts`) avec les trois occurrences : Koumassi, Port-Bouët, Marcory.

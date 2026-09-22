@@ -206,6 +206,7 @@ export interface Facture {
   montantTotal: number
   statutPaiement: StatutPaiement
   lignes: LigneFacture[]
+  reglements?: Reglement[]
 }
 
 export interface CreerFactureInput {
@@ -223,4 +224,69 @@ export interface ListerFacturesInput {
 
 export interface ImprimerDocumentOutput {
   cheminPdf: string
+}
+
+// reglements:*
+export interface Reglement {
+  id: string
+  factureId: string
+  dateReglement: Date
+  montant: number
+  modePaiement: string
+}
+
+export interface EnregistrerReglementInput {
+  factureId: string
+  montant: number
+  modePaiement: string
+  dateReglement?: string
+}
+
+export interface EnregistrerReglementOutput {
+  reglement: Reglement
+  facture: Facture
+}
+
+export interface ListerCreancesInput {
+  clientId?: string
+}
+
+export interface Creance {
+  clientId: string
+  nom: string
+  montantDu: number
+  ancienneteJours: number
+}
+
+// reversement:*
+export type StatutReversement = 'OUVERT' | 'CLOTURE'
+
+export interface LigneReversement {
+  id: string
+  ouvrageId: string
+  quantiteVendue: number
+  prixAchatUnitaire: number
+  montantDu: number
+}
+
+export interface Reversement {
+  id: string
+  periodeDebut: Date
+  periodeFin: Date
+  montantDu: number
+  montantVerse: number
+  dateVersement: Date | null
+  statutReversement: StatutReversement
+  lignes: LigneReversement[]
+}
+
+export interface GenererEtatReversementInput {
+  periodeDebut: string
+  periodeFin: string
+}
+
+export interface EnregistrerVersementInput {
+  reversementId: string
+  montantVerse: number
+  dateVersement: string
 }

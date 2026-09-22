@@ -8,6 +8,7 @@ import { enregistrerHandlersReglements } from './reglements'
 import { enregistrerHandlersReversement } from './reversement'
 import { enregistrerHandlersAuth } from './auth'
 import { enregistrerHandlersAdministration } from './administration'
+import { enregistrerHandlersRapports } from './rapports'
 
 export function enregistrerTousLesHandlersIpc(db: PrismaClient): void {
   enregistrerHandlersReferentiels(db)
@@ -19,4 +20,5 @@ export function enregistrerTousLesHandlersIpc(db: PrismaClient): void {
   enregistrerHandlersReversement(db)
   enregistrerHandlersAuth(db)
   enregistrerHandlersAdministration(db)
+  enregistrerHandlersRapports(db)
 }

@@ -20,6 +20,8 @@ import type {
   EnregistrerReglementInput,
   EnregistrerReglementOutput,
   EnregistrerVersementInput,
+  ExporterRapportInput,
+  ExporterRapportOutput,
   Facture,
   Fournisseur,
   GenererEtatReversementInput,
@@ -27,6 +29,8 @@ import type {
   ImprimerDocumentOutput,
   IpcResult,
   JournalAudit,
+  LigneRapportMarge,
+  LigneRapportVentes,
   ListerBonsLivraisonInput,
   ListerClientsInput,
   ListerCreancesInput,
@@ -36,6 +40,8 @@ import type {
   ModifierOuvrageInput,
   MouvementStock,
   Ouvrage,
+  RapportMargeInput,
+  RapportVentesInput,
   RestaurerInput,
   Reversement,
   SauvegarderMaintenantOutput,
@@ -94,5 +100,10 @@ export interface Api {
     listerSauvegardes(): Promise<IpcResult<string[]>>
     restaurer(input: RestaurerInput): Promise<IpcResult<{ ok: true }>>
     journalAudit(input?: ListerJournalAuditInput): Promise<IpcResult<JournalAudit[]>>
+  }
+  rapports: {
+    ventes(input: RapportVentesInput): Promise<IpcResult<LigneRapportVentes[]>>
+    marge(input: RapportMargeInput): Promise<IpcResult<LigneRapportMarge[]>>
+    exporter(input: ExporterRapportInput): Promise<IpcResult<ExporterRapportOutput>>
   }
 }

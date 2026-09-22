@@ -333,3 +333,53 @@ export interface SauvegarderMaintenantOutput {
 export interface RestaurerInput {
   cheminSauvegarde: string
 }
+
+// rapports:*
+export type GroupePar = 'ouvrage' | 'commune' | 'jour'
+
+export interface RapportVentesInput {
+  periodeDebut: string
+  periodeFin: string
+  groupePar: GroupePar
+}
+
+export interface LigneRapportVentes {
+  cle: string
+  quantite: number
+  montant: number
+}
+
+export interface RapportMargeInput {
+  periodeDebut: string
+  periodeFin: string
+}
+
+export interface LigneRapportMarge {
+  ouvrageId: string
+  titre: string
+  margeUnitaire: number
+  quantiteVendue: number
+  margeTotale: number
+}
+
+export type TypeRapport = 'ventes' | 'marge' | 'creances'
+export type FormatExport = 'pdf' | 'csv'
+
+export interface ExporterRapportInput {
+  type: TypeRapport
+  format: FormatExport
+  periodeDebut?: string
+  periodeFin?: string
+}
+
+export interface ExporterRapportOutput {
+  cheminFichier: string
+}
+
+// dashboard (composé côté renderer à partir des canaux existants — pas de canal dédié)
+export interface IndicateursDashboard {
+  stockTotal: number
+  ouvragesEnAlerte: number
+  creancesTotal: number
+  montantDuSupernova: number
+}

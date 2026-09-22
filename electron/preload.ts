@@ -12,6 +12,7 @@ import type {
   CreerUtilisateurInput,
   EnregistrerReglementInput,
   EnregistrerVersementInput,
+  ExporterRapportInput,
   GenererEtatReversementInput,
   HistoriqueStockInput,
   ListerBonsLivraisonInput,
@@ -21,6 +22,8 @@ import type {
   ListerJournalAuditInput,
   ListerOuvragesInput,
   ModifierOuvrageInput,
+  RapportMargeInput,
+  RapportVentesInput,
   RestaurerInput
 } from '../src/shared/types'
 import type { Api } from '../src/shared/api'
@@ -91,6 +94,11 @@ const api: Api = {
     restaurer: (input: RestaurerInput) => ipcRenderer.invoke('administration:restaurer', input),
     journalAudit: (input: ListerJournalAuditInput = {}) =>
       ipcRenderer.invoke('administration:journalAudit', input)
+  },
+  rapports: {
+    ventes: (input: RapportVentesInput) => ipcRenderer.invoke('rapports:ventes', input),
+    marge: (input: RapportMargeInput) => ipcRenderer.invoke('rapports:marge', input),
+    exporter: (input: ExporterRapportInput) => ipcRenderer.invoke('rapports:exporter', input)
   }
 }
 
